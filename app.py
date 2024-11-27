@@ -1,4 +1,5 @@
 from flask import Flask, render_template, Response
+import os
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -115,7 +116,12 @@ def generate_frames():
 @app.route('/')
 def index():
     return render_template('index.html')
+    
+def home():
+    return render_template('index.html')  # This will look for index.html inside the templates folder
 
+if __name__ == '__main__':
+    app.run(debug=True)
 
 @app.route('/get_alerts')
 def get_alerts():
@@ -128,6 +134,6 @@ def get_alerts():
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)
