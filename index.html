@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Drowsiness Monitoring</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1F1F28;
+            color: #F5F5F7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #E94560;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #E94560;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #FF6F61;
+        }
+        video {
+            border: 3px solid #E94560;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .alerts {
+            color: #F5F5F7;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #252526;
+            border: 2px solid #F5F5F7;
+            border-radius: 5px;
+            width: 80%;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        .green-alert {
+            border-color: #4CAF50;
+            background-color: #2E7D32;
+        }
+        .red-alert {
+            border-color: #FF5252;
+            background-color: #D32F2F;
+        }
+    </style>
+</head>
+<body>
+    <h1>Driver Drowsiness Monitoring</h1>
+    <div id="video-container" style="display: none;">
+        <img id="video-feed" src="/video_feed" alt="Video Feed">
+    </div>
+    <div id="alerts" class="alerts green-alert">
+        No alerts yet.
+    </div>
+    <div id="buttons">
+        <button id="start-monitoring" onclick="startMonitoring()">Start Monitoring</button>
+    </div>
+    <script>
+        let monitoring = false;
+
+        // Function to start monitoring
+        function startMonitoring() {
+            monitoring = true;
+            document.getElementById('video-container').style.display = 'block';
+            document.getElementById('start-monitoring').style.display = 'none';
+            document.getElementById('alerts').innerText = "Monitoring in progress...";
+            document.getElementById('alerts').classList.remove('green-alert');
+            document.getElementById('alerts').classList.add('green-alert');
+
+            // Create a stop monitoring button
+            const stopButton = document.createElement("button");
+            stopButton.innerText = "Stop Monitoring";
+            stopButton.onclick = stopMonitoring;
+            document.getElementById('buttons').appendChild(stopButton);
+            
+            setInterval(fetchAlerts, 1000);  // Fetch alerts every second
+        }
+
+        // Function to stop monitoring
+        function stopMonitoring() {
+            monitoring = false;
+            document.getElementById('video-container').style.display = 'none';
+            document.getElementById('alerts').innerText = "No alerts yet.";
+            document.getElementById('alerts').classList.remove('red-alert');
+            document.getElementById('alerts').classList.add('green-alert');
+            document.getElementById('start-monitoring').style.display = 'block';
+            document.getElementById('buttons').lastElementChild.remove();
+        }
+
+        // Function to fetch alerts
+        async function fetchAlerts() {
+            const response = await fetch('/get_alerts');
+            const data = await response.text();
+            const alertsElement = document.getElementById('alerts');
+            alertsElement.innerText = data || "No alerts yet.";
+
+            if (data && data.includes("Alert")) {
+                alertsElement.classList.remove('green-alert');
+                alertsElement.classList.add('red-alert');
+            } else {
+                alertsElement.classList.remove('red-alert');
+                alertsElement.classList.add('green-alert');
+            }
+        }
+    </script>
+</body>
+</html>
